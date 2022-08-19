@@ -13,7 +13,7 @@ from bert4keras.tokenizers import Tokenizer
 from bert4keras.optimizers import Adam
 from bert4keras.backend import keras, set_gelu, K
 from bert4keras.snippets import sequence_padding, DataGenerator
-from keras_layer_normalization import LayerNormalization
+from bert4keras.layers import LayerNormalization
 import tensorflow as tf
 
 from net import *
@@ -145,10 +145,9 @@ bert = build_transformer_model(
 output = Lambda(lambda x: x[:, 0],
                 name='CLS-token')(bert.output)
 
-fusion = Add()([output,cv_output])
-# fusion = BatchNormalization()(fusion)
-fusion = tf.keras.layers.LayerNormalization()(fusion)
 
+
+fusion = LayerNormalization(conditional=True)([output, cv_output])
 output = Dense(len(all_category),activation='softmax')(fusion)
 
 model = Model(bert.inputs, output)
